@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import javax.swing.JFrame;
 
 public class Window extends Canvas {
+    private static int height;
+    private static int width;
 
     public Window(int width, int height, String title, Game game) {
         JFrame frame = new JFrame(title);
@@ -15,7 +17,7 @@ public class Window extends Canvas {
         frame.setMinimumSize(new Dimension(width, height));
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setResizable(false);
+        frame.setResizable(true);
         frame.setLocationRelativeTo(null);
         frame.add(game);
         frame.setVisible(true);

@@ -1,8 +1,8 @@
 package com.game.main;
 
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 
-import com.game.main.Units.Type;
+import com.game.main.Units.UnitType;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -37,7 +37,7 @@ public class CombatSummary extends GameObject{
     }
 
     @Override
-    public void render(Graphics g) {
+    public void render(Graphics2D g) {
         if(visible){
             g.setColor(Color.BLACK);        
             Font font = new Font("Calibri", Font.BOLD, 18);
@@ -96,55 +96,55 @@ public class CombatSummary extends GameObject{
         double modifier1 = 1;
         double modifier2 = 1;
         info = "";
-        if(activeUnit.type == Type.ARCHER && targetUnit.type == Type.SOLDIER || 
-            activeUnit.type == Type.KNIGHT && targetUnit.type == Type.ARCHER ||
-            activeUnit.type == Type.SOLDIER && targetUnit.type == Type.KNIGHT){
+        if(activeUnit.getUnitType() == UnitType.ARCHER && targetUnit.getUnitType() == UnitType.SOLDIER || 
+            activeUnit.getUnitType() == UnitType.KNIGHT && targetUnit.getUnitType() == UnitType.ARCHER ||
+            activeUnit.getUnitType() == UnitType.SOLDIER && targetUnit.getUnitType() == UnitType.KNIGHT){
             modifier1 = LogicManager.EFFECTIVE_DAMAGE_MODIFIER;
             info = "Dealing " + LogicManager.EFFECTIVE_DAMAGE_MODIFIER + "x DMG";
         }
-        if(targetUnit.type == Type.ARCHER && activeUnit.type == Type.SOLDIER || 
-            targetUnit.type == Type.KNIGHT && activeUnit.type == Type.ARCHER ||
-            targetUnit.type == Type.SOLDIER && activeUnit.type == Type.KNIGHT){
+        if(targetUnit.getUnitType() == UnitType.ARCHER && activeUnit.getUnitType() == UnitType.SOLDIER || 
+            targetUnit.getUnitType() == UnitType.KNIGHT && activeUnit.getUnitType() == UnitType.ARCHER ||
+            targetUnit.getUnitType() == UnitType.SOLDIER && activeUnit.getUnitType() == UnitType.KNIGHT){
             modifier2 = LogicManager.EFFECTIVE_DAMAGE_MODIFIER;
             info = "Taking " + LogicManager.EFFECTIVE_DAMAGE_MODIFIER + "x DMG";
         }
-        int damageDone = (int)( (double) (activeUnit.atk + LogicManager.INITIATE_ATK_BONUS) * modifier1);
-        int damageReceived = (int)( (double)targetUnit.atk * modifier2);
-        if(activeUnit.player != targetUnit.player){
+        int damageDone = (int)( (double) (activeUnit.getAtk() + LogicManager.INITIATE_ATK_BONUS) * modifier1);
+        int damageReceived = (int)( (double)targetUnit.getAtk() * modifier2);
+        if(activeUnit.getPlayer() != targetUnit.getPlayer()){
             if(canCounter){
-                int final1 = activeUnit.hp - damageReceived;
-                int final2 = targetUnit.hp - damageDone;
+                int final1 = activeUnit.getHp() - damageReceived;
+                int final2 = targetUnit.getHp() - damageDone;
                 if(final1 < 0) final1 = 0;
                 if(final2 < 0) final2 = 0;
-                name1 = activeUnit.name + " attacks " + targetUnit.name;
-                hp1 = "HP: " + activeUnit.hp + "->" + final1;
+                name1 = activeUnit.getName() + " attacks " + targetUnit.getName();
+                hp1 = "HP: " + activeUnit.getHp() + "->" + final1;
                 atk1 = "ATK: " + damageDone;
-                hit1 = "HIT%: " + (activeUnit.hit - targetUnit.avd);
-                hp2 = "HP: " + targetUnit.hp + "->" + final2;
+                hit1 = "HIT%: " + (activeUnit.getHit() - targetUnit.getHit());
+                hp2 = "HP: " + targetUnit.getHp() + "->" + final2;
                 atk2 = "ATK: " + damageReceived;
-                hit2 = "HIT%: " + (targetUnit.hit - activeUnit.avd);
+                hit2 = "HIT%: " + (targetUnit.getHit() - activeUnit.getAvd());
             }
             else {
-                if (info == "Taking 1.3x DMG") info = "";
-                int final2 = targetUnit.hp - damageDone;
+                info = "";
+                int final2 = targetUnit.getHp() - damageDone;
                 if(final2 < 0) final2 = 0;
-                name1 = activeUnit.name + " attacks " + targetUnit.name;
-                hp1 = "HP: " + activeUnit.hp;
+                name1 = activeUnit.getName() + " attacks " + targetUnit.getName();
+                hp1 = "HP: " + activeUnit.getHp();
                 atk1 = "ATK: " + damageDone;
-                hit1 = "HIT%: " + (activeUnit.hit - targetUnit.avd);
-                hp2 = "HP: " + targetUnit.hp + "->" + final2;
+                hit1 = "HIT%: " + (activeUnit.getHit() - targetUnit.getAvd());
+                hp2 = "HP: " + targetUnit.getHp() + "->" + final2;
                 atk2 = "ATK: " + "---";
                 hit2 = "HIT%: " + "---";
             }
         }
-        else if(activeUnit.type == Type.MEDIC) {
-            int final2 = targetUnit.hp + (activeUnit.atk + LogicManager.INITIATE_ATK_BONUS) * 2;
-            if(final2 > targetUnit.maxHp) final2 = targetUnit.maxHp;
-            name1 = activeUnit.name + " heals " + targetUnit.name;
-            hp1 = "HP: " + activeUnit.hp;
-            atk1 = "Heal: " + (activeUnit.atk + LogicManager.INITIATE_ATK_BONUS) * 2;
+        else if(activeUnit.getUnitType() == UnitType.MEDIC) {
+            int final2 = targetUnit.getHp() + (activeUnit.getAtk() + LogicManager.INITIATE_ATK_BONUS) * 2;
+            if(final2 > targetUnit.getMaxHp()) final2 = targetUnit.getMaxHp();
+            name1 = activeUnit.getName() + " heals " + targetUnit.getName();
+            hp1 = "HP: " + activeUnit.getHp();
+            atk1 = "Heal: " + (activeUnit.getAtk() + LogicManager.INITIATE_ATK_BONUS) * 2;
             hit1 = "HIT%: ---";
-            hp2 = "HP: " + targetUnit.hp + "->" + final2;
+            hp2 = "HP: " + targetUnit.getHp() + "->" + final2;
             atk2 = "ATK: ---";
             hit2 = "HIT%: ---";
         }
@@ -152,13 +152,13 @@ public class CombatSummary extends GameObject{
     }
 
     public static void setPostCombatData(Units activeUnit, Units targetUnit, String result1, String result2){
-        name1 = activeUnit.name;
-        name2 = targetUnit.name;
+        name1 = activeUnit.getName();
+        name2 = targetUnit.getName();
         if(result1 == "Miss"){
-            hp1 = String.valueOf(activeUnit.hp);
+            hp1 = String.valueOf(activeUnit.getHp());
         }
         if(result2 == "Miss"){
-            hp2 = String.valueOf(targetUnit.hp);
+            hp2 = String.valueOf(targetUnit.getHp());
         }
         CombatSummary.result1 = result1;
         CombatSummary.result2 = result2;

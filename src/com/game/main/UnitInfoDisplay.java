@@ -1,21 +1,29 @@
 package com.game.main;
 
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Color;
 import java.awt.Font;
 
 public class UnitInfoDisplay extends GameObject{
-    public static String name = "Name: ";
-    public static String level = "Level: ";
-    public static String hp = "HP: ";
-    public static String atk = "ATK: ";
-    public static String hit = "HIT: ";
-    public static String avd = "AVD: ";
-    public static String mvmt = "MVMT: ";
-    public static String range = "RNG: ";
+    public static String name;
+    public static String level;
+    public static String hp;
+    public static String atk;
+    public static String hit;
+    public static String avd;
+    public static String mvmt;
+    public static String range;
 
     public UnitInfoDisplay(ObjectType type) {
         super(type);
+        name = "Name: ";
+        level = "Level: ";
+        hp = "HP: ";
+        atk = "ATK: ";
+        hit = "HIT: ";
+        avd = "AVD: ";
+        mvmt = "MVMT: ";
+        range = "RNG: ";
         Game.objectManager.addObject(this);
     }
 
@@ -24,7 +32,7 @@ public class UnitInfoDisplay extends GameObject{
     }
 
     @Override
-    public void render(Graphics g) {
+    public void render(Graphics2D g) {
         if(visible){
             g.setColor(Color.BLACK);        
             Font font = new Font("Calibri", Font.BOLD, 18);
@@ -55,17 +63,28 @@ public class UnitInfoDisplay extends GameObject{
             g.drawString(range, x, y);
         }
     }
+
+    public void initialize(){
+        name = "Name: ";
+        level = "Level: ";
+        hp = "HP: ";
+        atk = "ATK: ";
+        hit = "HIT: ";
+        avd = "AVD: ";
+        mvmt = "MVMT: ";
+        range = "RNG: ";
+    }
     
-    public static void setDisplayStrings(Units unit){
+    public void setDisplayStrings(Units unit){
         if(unit != null){
-            name = "Name: " + unit.name;
-            level = "Level: " + unit.level;
-            hp = "HP: " + unit.hp + "/" + unit.maxHp;
-            atk = "ATK: " + unit.atk;
-            hit = "HIT: " + unit.hit;
-            avd = "AVD: " + unit.avd;
-            mvmt = "MVMT: " + unit.mvmt;
-            range = "RNG: " + unit.range;
+            name = "Name: " + unit.getName();
+            level = "Level: " + unit.getLevel();
+            hp = "HP: " + unit.getHp() + "/" + unit.getMaxHp();
+            atk = "ATK: " + unit.getAtk();
+            hit = "HIT: " + unit.getHit();
+            avd = "AVD: " + unit.getAvd();
+            mvmt = "MVMT: " + unit.getMvmt();
+            range = "RNG: " + unit.getRange();
         }
     }
 }

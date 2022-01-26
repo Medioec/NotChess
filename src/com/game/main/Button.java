@@ -1,6 +1,6 @@
 package com.game.main;
 
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Color;
 import java.awt.Font;
 
@@ -25,7 +25,7 @@ public class Button extends GameObject {
     }
 
     @Override
-    public void render(Graphics g) {
+    public void render(Graphics2D g) {
         g.setColor(bgColor);
         g.fillRect(x, y, width, height);
         g.setColor(fontColor);

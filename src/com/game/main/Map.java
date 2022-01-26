@@ -1,19 +1,18 @@
 package com.game.main;
 
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 public class Map extends GameObject {
-    public int sizex;
-    public int sizey;
-    public static int[][][] mapData;
-    public static int mapID;
+    private int sizex;
+    private int sizey;
+    private int[][][] mapData;
+    private int mapID;
     public static final int SQUARELENGTH = 50;
 
     public Map(int x, int y, int sizex, int sizey, ObjectType type) {
         super(x, y, type);
-        this.sizex = sizex;
-        this.sizey = sizey;
+        setMapSize(sizex, sizey);
         this.width = sizex * SQUARELENGTH;
         this.height = sizey * SQUARELENGTH;
         mapID = this.id;
@@ -26,7 +25,7 @@ public class Map extends GameObject {
     }
 
     @Override
-    public void render(Graphics g) {
+    public void render(Graphics2D g) {
         g.setColor(Color.green);
         g.fillRect(x, y, width, height);
         g.setColor(Color.black);
@@ -43,24 +42,42 @@ public class Map extends GameObject {
         return coord;
     }
 
-    public static void setMapData(Coord coord, int unitID, int terrainID){
+    public void setMapSize(int sizex, int sizey){
+        this.sizex = sizex;
+        this.sizey = sizey;
+        mapData = new int[sizex][sizey][2];
+    }
+
+    public int getSizeX(){
+        return sizex;
+    }
+
+    public int getSizeY(){
+        return sizey;
+    }
+
+    public void setMapData(Coord coord, int unitID, int terrainID){
         mapData[coord.x][coord.y][0] = unitID;
         mapData[coord.x][coord.y][1] = terrainID;
     }
 
-    public static void setTerrainData(Coord coord, int terrainID){
+    public int[] getMapData(Coord coord){
+        return mapData[coord.x][coord.y];
+    }
+
+    public void setTerrainData(Coord coord, int terrainID){
         mapData[coord.x][coord.y][0] = terrainID;
     }
 
-    public static void setUnitData(Coord coord, int unitID){
+    public void setUnitData(Coord coord, int unitID){
         mapData[coord.x][coord.y][0] = unitID;
     }
 
-    public static int getTerrainID(Coord coord){
+    public int getTerrainID(Coord coord){
         return mapData[coord.x][coord.y][1];
     }
 
-    public static int getUnitID(Coord coord){
+    public int getUnitID(Coord coord){
         return mapData[coord.x][coord.y][0];
     }
 }

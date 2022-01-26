@@ -1,6 +1,6 @@
 package com.game.main;
 
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Color;
 
 public class Boxes extends GameObject {
@@ -32,7 +32,7 @@ public class Boxes extends GameObject {
     }
 
     @Override
-    public void render(Graphics g) {
+    public void render(Graphics2D g) {
         g.setColor(bgColor);
         if (this.fill == Fill.Fill) {
             if (this.edges == Edges.Default) {

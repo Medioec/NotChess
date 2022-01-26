@@ -1,10 +1,10 @@
 package com.game.main;
 
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.LinkedList;
 
 import com.game.main.HighlightMask.MaskType;
-import com.game.main.Units.Type;
+import com.game.main.Units.UnitType;
 
 import java.util.ArrayList;
 
@@ -22,7 +22,7 @@ public class ObjectManager {
         }
     }
 
-    public void render(Graphics g) {
+    public void render(Graphics2D g) {
         for (int i = 0; i < list.size(); i++) {
             GameObject object = list.get(i);
 
@@ -83,8 +83,8 @@ public class ObjectManager {
     }
 
     public void unitDefeated(Units unit){
-        int terrainID = Map.getTerrainID(unit.getCoord());
-        Map.setMapData(unit.getCoord(), -1, terrainID);
+        int terrainID = Game.map.getTerrainID(unit.getCoord());
+        Game.map.setMapData(unit.getCoord(), -1, terrainID);
         this.unitList.remove(unit);
     }
 
@@ -102,7 +102,7 @@ public class ObjectManager {
         ArrayList<Units> tempList = new ArrayList<Units>();
         for (int i = 0; i < unitList.size(); i++) {
             Units unit = unitList.get(i);
-            if (unit.canMove == true) {
+            if (unit.getMoveable() == true) {
                 tempList.add(unit);
             }
         }
@@ -112,7 +112,7 @@ public class ObjectManager {
     public boolean checkMoveableUnits(){
         for (int i = 0; i < unitList.size(); i++) {
             Units unit = unitList.get(i);
-            if (unit.canMove == true) {
+            if (unit.getMoveable() == true) {
                 return true;
             }
         }
@@ -122,10 +122,9 @@ public class ObjectManager {
     public void setUnitsMoveable(int player) {
         for (int i = 0; i < unitList.size(); i++) {
             Units unit = unitList.get(i);
-            if (unit.player == player) {
-                unit.canMove = true;
+            if (unit.getPlayer() == player) {
+                unit.setMoveable(true);;
                 new HighlightMask(unit.getCoord(), MaskType.MOVEABLEMASK);
-                //System.out.println("Unit " + unit.name + " set moveable.");
             }
         }
     }
@@ -133,11 +132,18 @@ public class ObjectManager {
     public void setUnitsNotMoveable(int player) {
         for (int i = 0; i < unitList.size(); i++) {
             Units unit = unitList.get(i);
-            if (unit.player == player && unit.canMove == true) {
-                unit.canMove = false;
+            if (unit.getPlayer() == player && unit.getMoveable() == true) {
+                unit.setMoveable(false);
                 HighlightMask.removeMask(unit.getCoord());
-                //System.out.println("Set unit "+unit.name+unit.id+" not moveable");
             }
+        }
+    }
+
+    public void setAllUnitsNotMoveable(){
+        for (int i = 0; i < unitList.size(); i++) {
+            Units unit = unitList.get(i);
+            unit.setMoveable(false);
+            HighlightMask.removeMask(unit.getCoord());
         }
     }
 
@@ -155,7 +161,7 @@ public class ObjectManager {
     public Units getPlayerKing(int player){
         for (int i = 0; i < unitList.size(); i++) {
             Units unit = unitList.get(i);
-            if (unit.type == Type.KING && unit.player == player) {
+            if (unit.getUnitType() == UnitType.KING && unit.getPlayer() == player) {
                 return unit;
             }
         }
@@ -166,7 +172,7 @@ public class ObjectManager {
         int count = 0;
         for (int i = 0; i < unitList.size(); i++) {
             Units unit = unitList.get(i);
-            if (unit.type == Type.KING) {
+            if (unit.getUnitType() == UnitType.KING) {
                 count++;
             }
         }

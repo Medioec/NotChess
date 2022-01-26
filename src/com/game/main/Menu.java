@@ -3,13 +3,13 @@ package com.game.main;
 import com.game.main.Boxes.Edges;
 import com.game.main.Boxes.Fill;
 import com.game.main.LogicManager.turnPhase;
-import com.game.main.Menu.Text.Content;
+import com.game.main.Text.Content;
 
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Font;
 
-public class Menu {
+class Menu {
     public static Button playButton;
     public static Button stopButton;
     public static Button endButton;
@@ -18,77 +18,6 @@ public class Menu {
     public static Text turnDisplay;
     public static Text turnCounter;
     public static Text phase;
-
-    public class Text extends GameObject {
-
-        public String textString = "";
-        public Color fontColor;
-        public Font font;
-        public Content content;
-        public String help = "Defeat the enemy King\n1.3x Damage:\nArcher -> Soldier\nSoldier -> Knight\nKnight -> Archer";
-    
-        public Text(ObjectType type){
-            super(type);
-            x = 0;
-            y = 0;
-            this.setFont("Calibri", 20, Color.BLACK);
-            Game.objectManager.addObject(this);
-        }
-    
-        @Override
-        public void render(Graphics g) {
-            if(content == Content.PLAYERTURN){
-                textString = "Player " + LogicManager.currentTurnPlayer + " turn";
-            }
-            else if(content == Content.TURNCOUNTER){
-                textString = "Turn " + (LogicManager.turnCount / LogicManager.playerCount + 1);
-            }
-            else if(content == Content.PHASE){
-                if(LogicManager.phase == turnPhase.CONFIRMATION){
-                    textString = "Combat Preview";
-                } else if(LogicManager.phase == turnPhase.GAMEOVER){
-                    textString = "Game Over";
-                } else {
-                    textString = "Phase: " + LogicManager.phase;
-                }
-            } else if(content == Content.HELP) {
-                textString = help;
-            }
-            
-            g.setColor(fontColor);
-            g.setFont(font);
-            g.drawString(textString, x, y);
-        }
-    
-        @Override
-        public void tick() {
-    
-        }
-
-        public enum Content{
-            PLAYERTURN,
-            TURNCOUNTER,
-            PHASE,
-            UNITINFODISPLAY,
-            HELP;
-        }
-    
-        public void setFont(String font, int fontSize, Color fontColor) {
-            this.font = new Font(font, Font.BOLD, fontSize);
-            this.fontColor = fontColor;
-        }
-
-        public void setPos(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        public void setText(String string){
-            textString = string;
-        }
-        
-
-    }
 
     public void createPlayButton() {
         int x = Game.WIDTH - Game.WIDTH / 32 * 7;
@@ -161,7 +90,7 @@ public class Menu {
     public void createUnitInfoDisplay(Units unit){
         Game.unitInfoDisplay = new UnitInfoDisplay(ObjectType.GameMenu);
         //Game.unitInfoDisplay.setPos(x, y);
-        UnitInfoDisplay.setDisplayStrings(unit);
+        Game.unitInfoDisplay.setDisplayStrings(unit);
     }
 
     public void createCombatSummary(){
@@ -230,4 +159,76 @@ public class Menu {
         createGameHelp();
         //System.out.println("Created Game Menu");
     }
+}
+
+class Text extends GameObject {
+
+    public String textString = "";
+    public Color fontColor;
+    public Font font;
+    public Content content;
+    public String help = "Defeat the enemy King\n1.3x Damage:\nArcher -> Soldier\nSoldier -> Knight\nKnight -> Archer";
+
+    public Text(ObjectType type){
+        super(type);
+        x = 0;
+        y = 0;
+        this.setFont("Calibri", 20, Color.BLACK);
+        Game.objectManager.addObject(this);
+    }
+
+    @Override
+    public void render(Graphics2D g) {
+        LogicManager logicManager = Game.logicManager;
+        if(content == Content.PLAYERTURN){
+            textString = "Player " + logicManager.getCurrentTurnPlayer() + " turn";
+        }
+        else if(content == Content.TURNCOUNTER){
+            textString = "Turn " + (logicManager.getTurnCount() / logicManager.getPlayerCount() + 1);
+        }
+        else if(content == Content.PHASE){
+            if(logicManager.getTurnPhase() == turnPhase.CONFIRMATION){
+                textString = "Combat Preview";
+            } else if(logicManager.getTurnPhase() == turnPhase.GAMEOVER){
+                textString = "Game Over";
+            } else {
+                textString = "Phase: " + logicManager.getTurnPhase();
+            }
+        } else if(content == Content.HELP) {
+            textString = help;
+        }
+        
+        g.setColor(fontColor);
+        g.setFont(font);
+        g.drawString(textString, x, y);
+    }
+
+    @Override
+    public void tick() {
+
+    }
+
+    public static enum Content{
+        PLAYERTURN,
+        TURNCOUNTER,
+        PHASE,
+        UNITINFODISPLAY,
+        HELP;
+    }
+
+    public void setFont(String font, int fontSize, Color fontColor) {
+        this.font = new Font(font, Font.BOLD, fontSize);
+        this.fontColor = fontColor;
+    }
+
+    public void setPos(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public void setText(String string){
+        textString = string;
+    }
+    
+
 }

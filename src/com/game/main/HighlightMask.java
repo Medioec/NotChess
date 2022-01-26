@@ -1,6 +1,6 @@
 package com.game.main;
 
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.awt.Color;
 
@@ -23,6 +23,9 @@ public class HighlightMask extends GameObject{
             case ACTIVEMASK:
             n = 2;
             break;
+            case ATTACKMASK:
+            n = 3;
+            break;
             default:
             n = 0;
             break;
@@ -44,27 +47,27 @@ public class HighlightMask extends GameObject{
     }
 
     @Override
-    public void render(Graphics g) {
+    public void render(Graphics2D g) {
         if(maskType == MaskType.MOVEMASK){
-            g.setColor(Color.BLUE);
-            g.drawRect(x + 1, y + 1, width - 2, height - 2);
-            //g.drawRect(x + 2, y + 2, width - 4, height - 4);
+            g.setColor(new Color(0f, 0.8f, 1f));
+            g.fillRect(x + 1, y + 1, width - 1, height - 1);
+            //g.fillRect(x + 2, y + 2, width - 4, height - 4);
         } else if(maskType == MaskType.MOVEABLEMASK) {
-            g.setColor(Color.WHITE);
-            g.drawRect(x + 1, y + 1, width - 2, height - 2);
-            g.drawRect(x + 2, y + 2, width - 4, height - 4);
+            g.setColor(new Color(1f, 1f, 1f, 0.8f));
+            g.fillRect(x + 1, y + 1, width - 1, height - 1);
+            //g.fillRect(x + 2, y + 2, width - 4, height - 4);
         } else if(maskType == MaskType.ACTIVEMASK) {
-            g.setColor(Color.YELLOW);
-            g.drawRect(x + 3, y + 3, width - 6, height - 6);
-            g.drawRect(x + 2, y + 2, width - 4, height - 4);
+            g.setColor(new Color(1f, 1f, 0f, 0.8f));
+            g.fillRect(x + 1, y + 1, width - 1, height - 1);
+            //g.fillRect(x + 2, y + 2, width - 4, height - 4);
         } else if(maskType == MaskType.ATTACKMASK) {
-            g.setColor(Color.RED);
-            g.drawRect(x + 1, y + 1, width - 2, height - 2);
-            //g.drawRect(x + 2, y + 2, width - 4, height - 4);
+            g.setColor(new Color(1f, 0f, 0f));
+            g.fillRect(x + 1, y + 1, width - 1, height - 1);
+            //g.fillRect(x + 2, y + 2, width - 4, height - 4);
         } else if(maskType == MaskType.ATTACKCONFIRMMASK) {
-            g.setColor(Color.RED);
-            g.drawRect(x + 1, y + 1, width - 2, height - 2);
-            g.drawRect(x + 2, y + 2, width - 4, height - 4);
+            g.setColor(new Color(1f, 0f, 0f));
+            g.fillRect(x + 1, y + 1, width - 1, height - 1);
+            //g.fillRect(x + 2, y + 2, width - 4, height - 4);
         }
     }
 
@@ -147,6 +150,8 @@ public class HighlightMask extends GameObject{
             }
             
             if (mask.maskType == MaskType.ATTACKMASK) {
+                Coord coord = mask.getCoord();
+                setMaskMap(coord, 0);
                 Game.objectManager.removeObject(mask);
                 i--;
             }

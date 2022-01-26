@@ -1,9 +1,10 @@
 package com.game.main;
 
 import java.awt.Canvas;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferStrategy;
 import java.awt.Color;
+import java.awt.RenderingHints;
 
 public class Game extends Canvas implements Runnable {
 
@@ -11,17 +12,17 @@ public class Game extends Canvas implements Runnable {
     public static final double FRAMERATE = 60.0;
     public static final double NANOS_IN_1_S = 1000000000;
 
-    public enum STATE {
+    public enum State {
         Menu,
         Game;
     }
 
-    public static STATE gameState = STATE.Menu;
+    public static State gameState = State.Menu;
 
     private Thread thread;
     private boolean running = false;
 
-    public Game game;
+    public static Game game;
     public static ObjectManager objectManager = new ObjectManager();
     public static LogicManager logicManager = new LogicManager(objectManager);
     public static Menu Menu = new Menu();
@@ -32,7 +33,7 @@ public class Game extends Canvas implements Runnable {
     public static CombatSummary combatSummary;
 
     public static void setStateMenu() {
-        gameState = STATE.Menu;
+        gameState = State.Menu;
         HighlightMask.resetMoveMask();
         Menu.removeGameMenu();
         objectManager.removeGameObjects();
@@ -40,7 +41,7 @@ public class Game extends Canvas implements Runnable {
     }
 
     public static void setStateGame() {
-        gameState = STATE.Game;
+        gameState = State.Game;
         HighlightMask.resetMoveMask();
         Board.createMap1();
         Menu.removeMainMenu();
@@ -55,7 +56,7 @@ public class Game extends Canvas implements Runnable {
 
         setStateMenu();
 
-        new Window(WIDTH, HEIGHT, "Test Game", this);
+        new Window(WIDTH, HEIGHT, "Not Chess", this);
 
     }
 
@@ -112,7 +113,11 @@ public class Game extends Canvas implements Runnable {
             return;
         }
 
-        Graphics g = bs.getDrawGraphics();
+        Graphics2D g = (Graphics2D) bs.getDrawGraphics();
+        RenderingHints hints = new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        hints.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        hints.put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints. VALUE_TEXT_ANTIALIAS_ON);
+        g.setRenderingHints(hints);
         // draw BG
         g.setColor(new Color(100, 150, 255));
         g.fillRect(0, 0, WIDTH, HEIGHT);

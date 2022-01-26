@@ -12,7 +12,7 @@ public class Coord {
     }
 
     public boolean isValid(){
-        if(x >= 0 && x < Game.map.sizex && y >= 0 && y < Game.map.sizey){
+        if(x >= 0 && x < Game.map.getSizeX() && y >= 0 && y < Game.map.getSizeY()){
             return true;
         }
         return false;

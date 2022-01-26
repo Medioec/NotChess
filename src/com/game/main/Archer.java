@@ -1,6 +1,6 @@
 package com.game.main;
 
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Color;
 import java.awt.Font;
 
@@ -8,16 +8,7 @@ public class Archer extends Units {
 
     public Archer(int x, int y, ObjectType type, int player) {
         super(x, y, type, player);
-        this.hp = 80;
-        this.maxHp = 80;
-        this.atk = 20;
-        this.hit = 100;
-        this.avd = 10;
-        this.mvmt = 3;
-        this.range = 3;
-        this.name = "Archer";
-        this.label = "A";
-        this.type = Type.ARCHER;
+        initialize(80, 80, 20, 100, 10, 3, 3, "Archer", "A", UnitType.ARCHER);
     }
 
     @Override
@@ -25,13 +16,8 @@ public class Archer extends Units {
     }
 
     @Override
-    public void render(Graphics g) {
-        if (player == 1) {
-            g.setColor(Color.BLUE);
-        } else {
-            g.setColor(Color.RED);
-        }
-        g.fillOval(x, y, width, height);
+    public void render(Graphics2D g) {
+        super.render(g);
         Font font = new Font("Calibri", Font.BOLD, 30);
         g.setColor(Color.BLACK);
         g.setFont(font);

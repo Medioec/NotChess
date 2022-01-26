@@ -1,7 +1,7 @@
 package com.game.main;
 
 import com.game.main.HighlightMask.MaskType;
-import com.game.main.Units.Type;
+import com.game.main.Units.UnitType;
 
 import java.awt.event.MouseEvent;
 
@@ -9,20 +9,19 @@ import java.util.Random;
 
 public class LogicManager {
     ObjectManager objectManager;
-    public static int moveCount = 0;
-    public static int checkedMoveCount = 0;
-    public static int turnCount;
-    public static int playerCount;
-    public static boolean p1Turn;
-    public static int selectedUnitID;
-    public static int selectedTerrainID;
-    public static int activeUnitID;
-    public static int targetUnitID;
-    public static Coord newCoord;
-    public static Coord oldCoord;
-    public static int currentTurnPlayer;
-    public static boolean validMove;
-    public static turnPhase phase;
+    private static int moveCount = 0;
+    private static int checkedMoveCount = 0;
+    private static int turnCount;
+    private static int playerCount;
+    private static int selectedUnitID;
+    private static int selectedTerrainID;
+    private static int activeUnitID;
+    private static int targetUnitID;
+    private static Coord newCoord;
+    private static Coord oldCoord;
+    private static int currentTurnPlayer;
+    private static boolean validMove;
+    private static turnPhase phase;
     public static final int INITIATE_ATK_BONUS = 10;
     public static final double EFFECTIVE_DAMAGE_MODIFIER = 1.4;
 
@@ -39,7 +38,42 @@ public class LogicManager {
         moveCount = 0;
         checkedMoveCount = -1;
         turnCount = 0;
-        p1Turn = true;
+        currentTurnPlayer = 1;
+        activeUnitID = -1;
+        selectedUnitID = -1;
+        targetUnitID = -1;
+        selectedTerrainID = -1;
+        validMove = false;
+        phase = turnPhase.SELECT;
+    }
+
+    public int getPlayerCount(){
+        return playerCount;
+    }
+
+    public void setPlayerCount(int count){
+        playerCount = count;
+    }
+
+    public void updateTurnCount(){
+        turnCount++;
+        currentTurnPlayer = turnCount % playerCount + 1;
+    }
+
+    public int getTurnCount(){
+        return turnCount;
+    }
+
+    public turnPhase getTurnPhase(){
+        return phase;
+    }
+
+    public void setTurnPhase(turnPhase newPhase){
+        phase = newPhase;
+    }
+
+    public int getCurrentTurnPlayer(){
+        return currentTurnPlayer;
     }
 
     public void setPhaseSelect() {
@@ -89,41 +123,40 @@ public class LogicManager {
         HighlightMask.removeMask(unit.getCoord());
         new HighlightMask(unit.getCoord(), MaskType.MOVEABLEMASK);
         if (unit.id == activeUnitID){
-            unit.canMove = true;
+            unit.setMoveable(true);
             activeUnitID = -1;
         }
     }
 
     // call functions to set units moveable, and change ui
     public void startPlayerTurn() {
-        //System.out.println("Starting player turn");
-        if (p1Turn) {
-            objectManager.setUnitsNotMoveable(2);
-            objectManager.setUnitsMoveable(1);
-            setPhaseSelect();
-            currentTurnPlayer = 1;
-        } else {
-            objectManager.setUnitsNotMoveable(1);
-            objectManager.setUnitsMoveable(2);
-            setPhaseSelect();
-            currentTurnPlayer = 2;
-        }
+        objectManager.setAllUnitsNotMoveable();
+        objectManager.setUnitsMoveable(currentTurnPlayer);
+        Game.unitInfoDisplay.initialize();
+        setPhaseSelect();
     }
 
     // set change over to next player
     public void otherPlayerTurn() {
+        selectedUnitID = -1;
         activeUnitID = -1;
+        targetUnitID = -1;
         HighlightMask.resetAllMask();
-        p1Turn = p1Turn ^ true;
-        turnCount++;
+        updateTurnCount();
         startPlayerTurn();
     }
 
     public void initializeGameLogic(){
-        currentTurnPlayer = 1;
+        moveCount = 0;
+        checkedMoveCount = -1;
         turnCount = 0;
-        p1Turn = true;
-        selectedTerrainID = selectedUnitID = activeUnitID = targetUnitID = -1;
+        currentTurnPlayer = 1;
+        activeUnitID = -1;
+        selectedUnitID = -1;
+        targetUnitID = -1;
+        selectedTerrainID = -1;
+        validMove = false;
+        phase = turnPhase.SELECT;
     }
 
     public void showMoveRange(Coord coord, int mvmt) {
@@ -171,7 +204,7 @@ public class LogicManager {
         coord.x += direction[0];
         coord.y += direction[1];
         //check if out of map bounds
-        if(coord.y < 0 || coord.y > Game.map.sizey - 1||coord.x < 0 || coord.x > Game.map.sizex - 1){
+        if(coord.y < 0 || coord.y > Game.map.getSizeY() - 1||coord.x < 0 || coord.x > Game.map.getSizeX() - 1){
             int[] result = {2, coord.x, coord.y};
             return result;
         }
@@ -181,17 +214,17 @@ public class LogicManager {
             return result;
         }
         //check if terrain passable
-        int terrainID = Map.mapData[coord.x][coord.y][1];
+        int terrainID = Game.map.getTerrainID(coord);
         if(terrainID < -1){
             int[] result = {2, coord.x, coord.y};
             return result;
         }
         //check if unit passable, enemies not passable
-        int unitID = Map.mapData[coord.x][coord.y][0];
+        int unitID = Game.map.getUnitID(coord);
         Units tempUnit = Game.objectManager.getUnitByID(unitID);
         Units selectedUnit = Game.objectManager.getUnitByID(LogicManager.selectedUnitID);
         if (tempUnit != null){
-            if(tempUnit.player != selectedUnit.player){
+            if(tempUnit.getPlayer() != selectedUnit.getPlayer()){
                 int[] result = {2, coord.x, coord.y};
                 return result;
             } else {
@@ -228,22 +261,22 @@ public class LogicManager {
         coord.x += direction[0];
         coord.y += direction[1];
         //check if out of map bounds
-        if(coord.y < 0 || coord.y > Game.map.sizey - 1||coord.x < 0 || coord.x > Game.map.sizex - 1){
+        if(coord.y < 0 || coord.y > Game.map.getSizeY() - 1||coord.x < 0 || coord.x > Game.map.getSizeX() - 1){
             int[] result = {2, coord.x, coord.y};
             return result;
         }
         //check if terrain passable
-        int terrainID = Map.mapData[coord.x][coord.y][1];
+        int terrainID = Game.map.getTerrainID(coord);
         if(terrainID < -1){
             int[] result = {2, coord.x, coord.y};
             return result;
         }
         //check if unit passable, enemies not passable
-        int unitID = Map.mapData[coord.x][coord.y][0];
+        int unitID = Game.map.getUnitID(coord);
         Units tempUnit = Game.objectManager.getUnitByID(unitID);
         Units activeUnit = Game.objectManager.getUnitByID(LogicManager.activeUnitID);
         if (tempUnit != null){
-            if(tempUnit.player != activeUnit.player){
+            if(tempUnit.getPlayer() != activeUnit.getPlayer()){
                 int[] result = {2, coord.x, coord.y};
                 return result;
             } else {
@@ -286,13 +319,13 @@ public class LogicManager {
                 int tempy = j;
                 Coord targetCoord = new Coord(tempx + activeUnit.getCoord().x, tempy + activeUnit.getCoord().y);
                 if (targetCoord.isValid()){
-                    int tempID = Map.getUnitID(targetCoord);
+                    int tempID = Game.map.getUnitID(targetCoord);
                     if(tempID != -1){
                         Units tempUnit = Game.objectManager.getUnitByID(tempID);
-                        if(tempUnit.player != activeUnit.player){
+                        if(tempUnit.getPlayer() != activeUnit.getPlayer()){
                             new HighlightMask(tempUnit.getCoord(), MaskType.ATTACKCONFIRMMASK);
                         }
-                        else if(activeUnit.type == Type.MEDIC && tempUnit != activeUnit){
+                        else if(activeUnit.getUnitType() == UnitType.MEDIC && tempUnit != activeUnit){
                             new HighlightMask(tempUnit.getCoord(), MaskType.ATTACKCONFIRMMASK);
                         }
                     }
@@ -305,7 +338,7 @@ public class LogicManager {
 
     public boolean checkTargetInRange(Units activeUnit, Units selectedUnit){
         if(Math.abs((activeUnit.getCoord().x - selectedUnit.getCoord().x)) + 
-            Math.abs((activeUnit.getCoord().y - selectedUnit.getCoord().y)) <= activeUnit.range){
+            Math.abs((activeUnit.getCoord().y - selectedUnit.getCoord().y)) <= activeUnit.getRange()){
             return true;
         }
         else {
@@ -320,7 +353,7 @@ public class LogicManager {
             for(int j = - remainder ; j <= remainder; j++){
                 int tempy = j;
                 Coord targetCoord = new Coord(tempx + coord.x, tempy + coord.y);
-                if(targetCoord.x >= 0 && targetCoord.x < Game.map.sizex && targetCoord.y >= 0 && targetCoord.y < Game.map.sizey){
+                if(targetCoord.x >= 0 && targetCoord.x < Game.map.getSizeX() && targetCoord.y >= 0 && targetCoord.y < Game.map.getSizeY()){
                     if(HighlightMask.getMaskMap(targetCoord) == 0){
                     new HighlightMask(targetCoord, MaskType.ATTACKMASK);
                     }
@@ -333,7 +366,7 @@ public class LogicManager {
             for(int j = - remainder ; j <= remainder; j++){
                 int tempx = j;
                 Coord targetCoord = new Coord(tempx + coord.x, tempy + coord.y);
-                if(targetCoord.x >= 0 && targetCoord.x < Game.map.sizex && targetCoord.y >= 0 && targetCoord.y < Game.map.sizey){
+                if(targetCoord.x >= 0 && targetCoord.x < Game.map.getSizeX() && targetCoord.y >= 0 && targetCoord.y < Game.map.getSizeY()){
                     if(HighlightMask.getMaskMap(targetCoord) == 0){
                     new HighlightMask(targetCoord, MaskType.ATTACKMASK);
                     }
@@ -343,17 +376,33 @@ public class LogicManager {
     }
     //scan whole map mask
     public void showAttackOnMovement(int range){
-        for(int i = 0; i < Game.map.sizex; i++){
+        for(int i = 0; i < Game.map.getSizeX(); i++){
             int prev = 0;
-            for(int j = 0; j < Game.map.sizey; j++){
-                if(HighlightMask.getMaskMap(new Coord(i,j)) == 1){
+            for(int j = 0; j < Game.map.getSizeY(); j++){
+                if(HighlightMask.getMaskMap(new Coord(i, j)) == 1){
                     if(prev == 0){
-                        showSpotAttackRange(new Coord(i,j), range);
+                        showSpotAttackRange(new Coord(i, j), range);
                         prev = 1;
                     }
                 } else {
                     if(prev == 1){
-                        showSpotAttackRange(new Coord(i,j-1), range);
+                        showSpotAttackRange(new Coord(i, j - 1), range);
+                        prev = 0;
+                    }
+                }
+            }
+        }
+        for(int i = 0; i < Game.map.getSizeY(); i++){
+            int prev = 0;
+            for(int j = 0; j < Game.map.getSizeX(); j++){
+                if(HighlightMask.getMaskMap(new Coord(j, i)) == 1){
+                    if(prev == 0){
+                        showSpotAttackRange(new Coord(j, i), range);
+                        prev = 1;
+                    }
+                } else {
+                    if(prev == 1){
+                        showSpotAttackRange(new Coord(j - 1, i), range);
                         prev = 0;
                     }
                 }
@@ -365,8 +414,8 @@ public class LogicManager {
         newCoord = coord;
         oldCoord = unit.getCoord();
         unit.setCoord(coord);
-        Map.setUnitData(oldCoord, -1);
-        Map.setUnitData(newCoord, unit.id);
+        Game.map.setUnitData(oldCoord, -1);
+        Game.map.setUnitData(newCoord, unit.id);
         HighlightMask.shiftMoveableMask(oldCoord, newCoord);
     }
 
@@ -379,19 +428,19 @@ public class LogicManager {
         String result2 = "";
         double modifier1 = 1;
         double modifier2 = 1;
-        if(activeUnit.type == Type.ARCHER && targetUnit.type == Type.SOLDIER || 
-            activeUnit.type == Type.KNIGHT && targetUnit.type == Type.ARCHER ||
-            activeUnit.type == Type.SOLDIER && targetUnit.type == Type.KNIGHT){
+        if(activeUnit.getUnitType() == UnitType.ARCHER && targetUnit.getUnitType() == UnitType.SOLDIER || 
+            activeUnit.getUnitType() == UnitType.KNIGHT && targetUnit.getUnitType() == UnitType.ARCHER ||
+            activeUnit.getUnitType() == UnitType.SOLDIER && targetUnit.getUnitType() == UnitType.KNIGHT){
             modifier1 = EFFECTIVE_DAMAGE_MODIFIER;
         }
-        if(targetUnit.type == Type.ARCHER && activeUnit.type == Type.SOLDIER || 
-            targetUnit.type == Type.KNIGHT && activeUnit.type == Type.ARCHER ||
-            targetUnit.type == Type.SOLDIER && activeUnit.type == Type.KNIGHT){
+        if(targetUnit.getUnitType() == UnitType.ARCHER && activeUnit.getUnitType() == UnitType.SOLDIER || 
+            targetUnit.getUnitType() == UnitType.KNIGHT && activeUnit.getUnitType() == UnitType.ARCHER ||
+            targetUnit.getUnitType() == UnitType.SOLDIER && activeUnit.getUnitType() == UnitType.KNIGHT){
             modifier2 = EFFECTIVE_DAMAGE_MODIFIER;
         }
-        if(activeUnit.type == Type.MEDIC && activeUnit.player == targetUnit.player){
-            targetUnit.hp = targetUnit.hp + (activeUnit.atk + LogicManager.INITIATE_ATK_BONUS) * 2;
-            if(targetUnit.hp > targetUnit.maxHp) targetUnit.hp = targetUnit.maxHp;
+        if(activeUnit.getUnitType() == UnitType.MEDIC && activeUnit.getPlayer() == targetUnit.getPlayer()){
+            targetUnit.setHp(targetUnit.getHp() + (activeUnit.getAtk() + LogicManager.INITIATE_ATK_BONUS) * 2);
+            if(targetUnit.getHp() > targetUnit.getHp()) targetUnit.setHp(targetUnit.getMaxHp());
         }
         else {
             // add combat code
@@ -399,35 +448,35 @@ public class LogicManager {
             int r1 = r.nextInt(99);
             int r2 = r.nextInt(99);
             boolean canCounter = checkTargetInRange(targetUnit, activeUnit);
-            int damageDone = (int)( (double) (activeUnit.atk + INITIATE_ATK_BONUS) * modifier1);
-            int damageReceived = (int)( (double)targetUnit.atk * modifier2);
+            int damageDone = (int)( (double) (activeUnit.getAtk() + INITIATE_ATK_BONUS) * modifier1);
+            int damageReceived = (int)( (double)targetUnit.getAtk() * modifier2);
             if(canCounter){
                 //calc activeunit hp
-                if (r1 < targetUnit.hit - activeUnit.avd){
-                    activeUnit.hp = activeUnit.hp - damageReceived;
+                if (r1 < targetUnit.getHit() - activeUnit.getAvd()){
+                    activeUnit.setHp(activeUnit.getHp() - damageReceived);
                     result1 = "Hit";
                 } else {
                     result1 = "Miss";
                 }
                 //calc targetunit hp
-                if (r2 < activeUnit.hit - targetUnit.avd){
-                    targetUnit.hp = targetUnit.hp - damageDone;
+                if (r2 < activeUnit.getHit() - targetUnit.getAvd()){
+                    targetUnit.setHp(targetUnit.getHp() - damageDone);
                     result2 = "Hit";
                 } else {
                     result2 = "Miss";
                 }
-                if(activeUnit.hp < 0) activeUnit.hp = 0;
-                if(targetUnit.hp < 0) targetUnit.hp = 0;
+                if(activeUnit.getHp() < 0) activeUnit.setHp(0);
+                if(targetUnit.getHp() < 0) targetUnit.setHp(0);
             }
             else {
                 result1 = "---";
-                if (r2 < activeUnit.hit - targetUnit.avd){
-                    targetUnit.hp = targetUnit.hp - damageDone;
+                if (r2 < activeUnit.getHit() - targetUnit.getAvd()){
+                    targetUnit.setHp(targetUnit.getHp() - damageDone);
                     result2 = "Hit";
                 } else {
                     result2 = "Miss";
                 }
-                if(targetUnit.hp < 0) targetUnit.hp = 0;
+                if(targetUnit.getHp() < 0) targetUnit.setHp(0);
             }
         }
         CombatSummary.setPostCombatData(activeUnit, targetUnit, result1, result2);
@@ -438,12 +487,12 @@ public class LogicManager {
         HighlightMask.resetAttackConfirmMask();
         HighlightMask.resetMoveMask();
         HighlightMask.resetAttackMask();
-        if(active.hp <= 0) {
+        if(active.getHp() <= 0) {
             Game.objectManager.unitDefeated(active);
         }
-        if(target.hp <= 0) {
+        if(target.getHp() <= 0) {
             Game.objectManager.unitDefeated(target);
-            if(active.hp > 0){
+            if(active.getHp() > 0){
                 increaseUnitLevel(active);
             }
         }
@@ -451,16 +500,12 @@ public class LogicManager {
     }
 
     public void increaseUnitLevel(Units active){
-        active.level++;
-        active.maxHp +=5;
-        active.atk +=5;
-        active.hit +=5;
-        active.avd +=5;
+        active.increaseUnitLevel();
     }
 
     public void unitDefeated(Units unit){
-        int terrainID = Map.getTerrainID(unit.getCoord());
-        Map.setMapData(unit.getCoord(), -1, terrainID);
+        int terrainID = Game.map.getTerrainID(unit.getCoord());
+        Game.map.setMapData(unit.getCoord(), -1, terrainID);
         objectManager.removeUnit(unit);
     }
 
@@ -478,11 +523,11 @@ public class LogicManager {
         int my = e.getY();
         Coord coord;
 
-        if (Game.gameState == Game.STATE.Menu) {
+        if (Game.gameState == Game.State.Menu) {
             if (MouseInput.mouseOver(mx, my, Menu.playButton)) {
                 Game.setStateGame();
             }
-        } else if (Game.gameState == Game.STATE.Game) {
+        } else if (Game.gameState == Game.State.Game) {
             // check for click on stop button
             if (MouseInput.mouseOver(mx, my, Menu.stopButton)) {
                 Game.setStateMenu();
@@ -499,14 +544,14 @@ public class LogicManager {
                     coord = map.convToCoord(mx, my);
                     //System.out.print(coord.x + "," + coord.y);
                     // get map data of square clicked
-                    LogicManager.selectedUnitID = Map.getUnitID(coord);
-                    LogicManager.selectedTerrainID = Map.getTerrainID(coord);
+                    LogicManager.selectedUnitID = Game.map.getUnitID(coord);
+                    LogicManager.selectedTerrainID = Game.map.getTerrainID(coord);
                     //System.out.print("Selected Unit ID = " + LogicManager.selectedUnitID);
                     //System.out.println("   Selected Terrain ID = " + LogicManager.selectedTerrainID);
 
                     // check if unit moveable
                     Units selectedUnit = Game.objectManager.getUnitByID(LogicManager.selectedUnitID);
-                    UnitInfoDisplay.setDisplayStrings(selectedUnit);
+                    Game.unitInfoDisplay.setDisplayStrings(selectedUnit);
                     Units activeUnit = Game.objectManager.getUnitByID(LogicManager.activeUnitID);
                     //if (unit != null) {
                     // Select phase
@@ -515,21 +560,21 @@ public class LogicManager {
                         Game.unitInfoDisplay.visible = true;
                         // if moveable, set active and show movement range
                         if(selectedUnit != null){
-                            if(selectedUnit.canMove == true){
+                            if(selectedUnit.getMoveable() == true){
                                 this.setUnitActive(selectedUnit);
                                 this.setPhaseMove();
                                 HighlightMask.resetMoveMask();
                                 HighlightMask.resetAttackMask();
-                                this.showMoveRange(coord, selectedUnit.mvmt);
-                                this.showAttackOnMovement(selectedUnit.range);
+                                this.showMoveRange(coord, selectedUnit.getMvmt());
+                                this.showAttackOnMovement(selectedUnit.getRange());
                                 //System.out.println("Selected Unit: " + LogicManager.activeUnitID + " Move Phase");
-                            } else if(selectedUnit.canMove == false){
+                            } else if(selectedUnit.getMoveable() == false){
                                 this.unsetUnitActive();
                                 this.setPhaseSelect();
                                 HighlightMask.resetMoveMask();
                                 HighlightMask.resetAttackMask();
-                                this.showMoveRange(coord, selectedUnit.mvmt);
-                                this.showAttackOnMovement(selectedUnit.range);
+                                this.showMoveRange(coord, selectedUnit.getMvmt());
+                                this.showAttackOnMovement(selectedUnit.getRange());
                             }
                         }
                         else if(selectedUnit == null){
@@ -539,7 +584,7 @@ public class LogicManager {
                     }
                     // Move phase
                     else if(this.isPhase(turnPhase.MOVE)){
-                        if(activeUnit == null || activeUnit.canMove == false){
+                        if(activeUnit == null || activeUnit.getMoveable() == false){
                             activeUnit = null;
                             HighlightMask.resetMoveMask();
                             HighlightMask.resetAttackMask();
@@ -548,17 +593,17 @@ public class LogicManager {
                         }
                         else if(selectedUnit == null){
                             //on empty space, moveunit if unit moveable by current player and destination is valid
-                            if(activeUnit.canMove == true){
+                            if(activeUnit.getMoveable() == true){
                                 coord = map.convToCoord(mx, my);
                                 LogicManager.validMove = false;
-                                this.checkValidMove(activeUnit.getCoord(), coord, activeUnit.mvmt);
+                                this.checkValidMove(activeUnit.getCoord(), coord, activeUnit.getMvmt());
                                 if (LogicManager.validMove) {
                                     //System.out.println("Execute Move");
                                     this.moveUnit(activeUnit, coord);
                                     HighlightMask.resetMoveMask();
                                     HighlightMask.resetAttackMask();
-                                    activeUnit.canMove = false;
-                                    this.showTargetInRange(activeUnit, activeUnit.range);
+                                    activeUnit.setMoveable(false);
+                                    this.showTargetInRange(activeUnit, activeUnit.getRange());
                                     this.setPhaseAttack();
                                 }
                                 else {
@@ -576,9 +621,9 @@ public class LogicManager {
                                 HighlightMask.resetAttackMask();
                                 oldCoord = activeUnit.getCoord();
                                 newCoord = activeUnit.getCoord();
-                                activeUnit.canMove = false;
+                                activeUnit.setMoveable(false);
                                 this.setPhaseAttack();
-                                this.showTargetInRange(activeUnit, activeUnit.range);
+                                this.showTargetInRange(activeUnit, activeUnit.getRange());
                             }
                             //if not active unit, show ranges
                             //if belong to player switch active unit
@@ -586,13 +631,13 @@ public class LogicManager {
                             else if(selectedUnit != activeUnit){
                                 HighlightMask.resetMoveMask();
                                 HighlightMask.resetAttackMask();
-                                this.showMoveRange(coord, selectedUnit.mvmt);
-                                this.showAttackOnMovement(selectedUnit.range);
-                                if(selectedUnit.player == LogicManager.currentTurnPlayer) {
-                                    if(selectedUnit.canMove){
+                                this.showMoveRange(coord, selectedUnit.getMvmt());
+                                this.showAttackOnMovement(selectedUnit.getRange());
+                                if(selectedUnit.getPlayer() == LogicManager.currentTurnPlayer) {
+                                    if(selectedUnit.getMoveable()){
                                         this.setUnitActive(selectedUnit);
                                     }
-                                    else if(!selectedUnit.canMove){
+                                    else if(!selectedUnit.getMoveable()){
                                         this.setUnitMoveable(activeUnit);
                                         this.setPhaseSelect();
                                     }
@@ -624,7 +669,7 @@ public class LogicManager {
                                 this.unsetUnitActive();
                                 this.setPhaseSelect();
                             }
-                            else if(selectedUnit.player != LogicManager.currentTurnPlayer || activeUnit.type == Type.MEDIC){
+                            else if(selectedUnit.getPlayer() != LogicManager.currentTurnPlayer || activeUnit.getUnitType() == UnitType.MEDIC){
                                 //check valid attack
                                 if (this.checkTargetInRange(activeUnit, selectedUnit)){
                                     LogicManager.targetUnitID = LogicManager.selectedUnitID;
@@ -637,14 +682,14 @@ public class LogicManager {
                                 }
                                 HighlightMask.resetMoveMask();
                                 HighlightMask.resetAttackMask();
-                                this.showMoveRange(coord, selectedUnit.mvmt);
-                                this.showAttackOnMovement(selectedUnit.range);
+                                this.showMoveRange(coord, selectedUnit.getMvmt());
+                                this.showAttackOnMovement(selectedUnit.getRange());
                             }
-                            else if(selectedUnit.player == LogicManager.currentTurnPlayer){
+                            else if(selectedUnit.getPlayer() == LogicManager.currentTurnPlayer){
                                 HighlightMask.resetMoveMask();
                                 HighlightMask.resetAttackMask();
-                                this.showMoveRange(coord, selectedUnit.mvmt);
-                                this.showAttackOnMovement(selectedUnit.range);
+                                this.showMoveRange(coord, selectedUnit.getMvmt());
+                                this.showAttackOnMovement(selectedUnit.getRange());
                             }
                         }
                     }
@@ -670,7 +715,7 @@ public class LogicManager {
                                 this.setPhaseAttack();
                             }
                             else if(selectedUnit != activeUnit){
-                                if(selectedUnit.player != LogicManager.currentTurnPlayer || activeUnit.type == Type.MEDIC){
+                                if(selectedUnit.getPlayer() != LogicManager.currentTurnPlayer || activeUnit.getUnitType() == UnitType.MEDIC){
                                     Units target = Game.objectManager.getUnitByID(LogicManager.targetUnitID);
                                     if(selectedUnit == target){
                                         this.performCombat(activeUnit, selectedUnit);
@@ -688,27 +733,27 @@ public class LogicManager {
                                             this.calculateCombatSummary(activeUnit, selectedUnit);
                                             HighlightMask.resetMoveMask();
                                             HighlightMask.resetAttackMask();
-                                            this.showMoveRange(coord, selectedUnit.mvmt);
-                                            this.showAttackOnMovement(selectedUnit.range);
+                                            this.showMoveRange(coord, selectedUnit.getMvmt());
+                                            this.showAttackOnMovement(selectedUnit.getRange());
                                         } else {
                                             HighlightMask.resetMoveMask();
                                             HighlightMask.resetAttackMask();
                                             Game.combatSummary.toggleVisible();
                                             Game.unitInfoDisplay.toggleVisible();
-                                            this.showMoveRange(coord, selectedUnit.mvmt);
-                                            this.showAttackOnMovement(selectedUnit.range);
+                                            this.showMoveRange(coord, selectedUnit.getMvmt());
+                                            this.showAttackOnMovement(selectedUnit.getRange());
                                             this.setPhaseAttack();
                                         }
                                     }
                                     
                                 }
-                                else if(selectedUnit.player == LogicManager.currentTurnPlayer){
+                                else if(selectedUnit.getPlayer() == LogicManager.currentTurnPlayer){
                                     HighlightMask.resetMoveMask();
                                     HighlightMask.resetAttackMask();
                                     Game.combatSummary.toggleVisible();
                                     Game.unitInfoDisplay.toggleVisible();
-                                    this.showMoveRange(coord, selectedUnit.mvmt);
-                                    this.showAttackOnMovement(selectedUnit.range);
+                                    this.showMoveRange(coord, selectedUnit.getMvmt());
+                                    this.showAttackOnMovement(selectedUnit.getRange());
                                     this.setPhaseAttack();
                                 }
                             }

@@ -1,7 +1,7 @@
 package com.game.main;
 
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 public class GameHelp extends GameObject{
     public String help1 = "Defeat the enemy King";
@@ -20,7 +20,7 @@ public class GameHelp extends GameObject{
     }
 
     @Override
-    public void render(Graphics g) {
+    public void render(Graphics2D g) {
         g.setColor(Color.BLACK);
         x = commonx + Game.WIDTH / 64 * 51;
         y = commony + Game.HEIGHT / 32 * 16;
