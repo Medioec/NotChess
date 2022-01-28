@@ -166,7 +166,8 @@ public class LogicManager {
                 int[] result = checkAdjacentValidMoveMask(i, coord);
                 Coord nextCoord = new Coord(result[1], result[2]);
                 if(result[0] == 1||result[0] == 0){
-                    new HighlightMask(nextCoord, MaskType.MOVEMASK);
+                    if(HighlightMask.getMaskMap(nextCoord) == 0)
+                        new HighlightMask(nextCoord, MaskType.MOVEMASK);
                     nextMvmt = mvmt - 1;
                     showMoveRange(nextCoord, nextMvmt);
                 } else if (result[0] == 4){
@@ -208,8 +209,8 @@ public class LogicManager {
             int[] result = {2, coord.x, coord.y};
             return result;
         }
-        //check if existing mask exists
-        if(HighlightMask.getMaskMap(coord) == 1||HighlightMask.getMaskMap(coord) == 2){
+        //check if incompatible mask exists
+        if(HighlightMask.getMaskMap(coord) == 1||HighlightMask.getMaskMap(coord) == 4){
             int[] result = {4, coord.x, coord.y};
             return result;
         }
@@ -599,9 +600,9 @@ public class LogicManager {
                                 this.checkValidMove(activeUnit.getCoord(), coord, activeUnit.getMvmt());
                                 if (LogicManager.validMove) {
                                     //System.out.println("Execute Move");
-                                    this.moveUnit(activeUnit, coord);
                                     HighlightMask.resetMoveMask();
                                     HighlightMask.resetAttackMask();
+                                    this.moveUnit(activeUnit, coord);
                                     activeUnit.setMoveable(false);
                                     this.showTargetInRange(activeUnit, activeUnit.getRange());
                                     this.setPhaseAttack();
@@ -631,11 +632,10 @@ public class LogicManager {
                             else if(selectedUnit != activeUnit){
                                 HighlightMask.resetMoveMask();
                                 HighlightMask.resetAttackMask();
-                                this.showMoveRange(coord, selectedUnit.getMvmt());
-                                this.showAttackOnMovement(selectedUnit.getRange());
                                 if(selectedUnit.getPlayer() == LogicManager.currentTurnPlayer) {
                                     if(selectedUnit.getMoveable()){
                                         this.setUnitActive(selectedUnit);
+                                        this.setUnitMoveable(activeUnit);
                                     }
                                     else if(!selectedUnit.getMoveable()){
                                         this.setUnitMoveable(activeUnit);
@@ -647,6 +647,8 @@ public class LogicManager {
                                     this.setUnitMoveable(activeUnit);
                                     this.setPhaseSelect();
                                 }
+                                this.showMoveRange(coord, selectedUnit.getMvmt());
+                                this.showAttackOnMovement(selectedUnit.getRange());
                             }
                         }
                     }

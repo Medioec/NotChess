@@ -26,12 +26,12 @@ public class Map extends GameObject {
 
     @Override
     public void render(Graphics2D g) {
-        g.setColor(Color.green);
+        g.setColor(new Color(0.2f, 1f, 0.2f));
         g.fillRect(x, y, width, height);
-        g.setColor(Color.black);
+        g.setColor(new Color(0f, 0f, 0f, 0.1f));
         for (int i = 0; i + x < x + width; i += 50) {
             for (int j = 0; j + y < y + height; j += 50) {
-                g.drawRect(i + x, j + y, SQUARELENGTH, SQUARELENGTH);
+                g.drawRect(i + x, j + y, SQUARELENGTH - 1, SQUARELENGTH - 1);
             }
         }
 

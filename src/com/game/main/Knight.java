@@ -18,9 +18,6 @@ public class Knight extends Units {
     @Override
     public void render(Graphics2D g) {
         super.render(g);
-        Font font = new Font("Calibri", Font.BOLD, 30);
-        g.setColor(Color.BLACK);
-        g.setFont(font);
         g.drawString("K", x + 11, y + 30);
 
     }

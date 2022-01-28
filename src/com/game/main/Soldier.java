@@ -18,9 +18,6 @@ public class Soldier extends Units {
     @Override
     public void render(Graphics2D g) {
         super.render(g);
-        Font font = new Font("Calibri", Font.BOLD, 30);
-        g.setColor(Color.BLACK);
-        g.setFont(font);
         g.drawString("S", x + 13, y + 30);
 
     }

@@ -18,9 +18,6 @@ public class Medic extends Units {
     @Override
     public void render(Graphics2D g) {
         super.render(g);
-        Font font = new Font("Calibri", Font.BOLD, 30);
-        g.setColor(Color.BLACK);
-        g.setFont(font);
         g.drawString("M", x + 7, y + 30);
 
     }

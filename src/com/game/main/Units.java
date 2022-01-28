@@ -41,11 +41,14 @@ public abstract class Units extends GameObject {
     @Override
     public void render(Graphics2D g){
         if (player == 1) {
-            g.setColor(new Color(0f, 0f, 0.9f));
+            g.setColor(new Color(0.2f, 0.2f, 1f));
         } else {
-            g.setColor(new Color(0.7f, 0f, 0f));
+            g.setColor(new Color(1f, 0.2f, 0.2f));
         }
         g.fillOval(x, y, width, height);
+        Font font = new Font("Calibri", Font.BOLD, 30);
+        g.setColor(Color.BLACK);
+        g.setFont(font);
     }
 
     public void setCoord(Coord coord) {

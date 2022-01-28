@@ -20,17 +20,17 @@ public class HighlightMask extends GameObject{
             case MOVEMASK:
             n = 1;
             break;
-            case ACTIVEMASK:
-            n = 2;
-            break;
             case ATTACKMASK:
             n = 3;
+            break;
+            case ACTIVEMASK:
+            n = 4;
             break;
             default:
             n = 0;
             break;
         }
-        setMaskMap(coords, n);
+        if(getMaskMap(coords) == 0) setMaskMap(coords, n);
         Game.objectManager.addObject(this);
     }
 
@@ -50,23 +50,31 @@ public class HighlightMask extends GameObject{
     public void render(Graphics2D g) {
         if(maskType == MaskType.MOVEMASK){
             g.setColor(new Color(0f, 0.8f, 1f));
-            g.fillRect(x + 1, y + 1, width - 1, height - 1);
+            g.fillRect(x, y, width, height);
+            g.setColor(new Color(0f, 0f, 0f, 0.1f));
+            g.drawRect(x, y, width - 1, height - 1);
             //g.fillRect(x + 2, y + 2, width - 4, height - 4);
         } else if(maskType == MaskType.MOVEABLEMASK) {
             g.setColor(new Color(1f, 1f, 1f, 0.8f));
-            g.fillRect(x + 1, y + 1, width - 1, height - 1);
+            g.fillRect(x, y, width, height);
+            g.setColor(new Color(0f, 0f, 0f, 0.1f));
+            g.drawRect(x, y, width - 1, height - 1);
             //g.fillRect(x + 2, y + 2, width - 4, height - 4);
         } else if(maskType == MaskType.ACTIVEMASK) {
-            g.setColor(new Color(1f, 1f, 0f, 0.8f));
-            g.fillRect(x + 1, y + 1, width - 1, height - 1);
+            g.setColor(new Color(0.8f, 0.8f, 0.2f));
+            g.fillRect(x, y, width, height);
             //g.fillRect(x + 2, y + 2, width - 4, height - 4);
         } else if(maskType == MaskType.ATTACKMASK) {
-            g.setColor(new Color(1f, 0f, 0f));
-            g.fillRect(x + 1, y + 1, width - 1, height - 1);
+            g.setColor(new Color(0.7f, 0.5f, 0.5f));
+            g.fillRect(x, y, width, height);
+            g.setColor(new Color(0f, 0f, 0f, 0.1f));
+            g.drawRect(x, y, width - 1, height - 1);
             //g.fillRect(x + 2, y + 2, width - 4, height - 4);
         } else if(maskType == MaskType.ATTACKCONFIRMMASK) {
-            g.setColor(new Color(1f, 0f, 0f));
-            g.fillRect(x + 1, y + 1, width - 1, height - 1);
+            g.setColor(new Color(1f, 0.7f, 0.3f));
+            g.fillRect(x, y, width, height);
+            g.setColor(new Color(0f, 0f, 0f, 0.1f));
+            g.drawRect(x, y, width - 1, height - 1);
             //g.fillRect(x + 2, y + 2, width - 4, height - 4);
         }
     }
@@ -80,7 +88,7 @@ public class HighlightMask extends GameObject{
         }
     }
 
-    public int enumMaskType(){
+    public static int enumMaskType(MaskType maskType){
         int n;
         switch(maskType){
             case MOVEMASK:
@@ -91,6 +99,9 @@ public class HighlightMask extends GameObject{
             break;
             case ATTACKMASK:
             n = 3;
+            break;
+            case ACTIVEMASK:
+            n = 4;
             break;
             default:
             n = 0;
@@ -133,7 +144,7 @@ public class HighlightMask extends GameObject{
             }
             if (mask.maskType == MaskType.MOVEMASK) {
                 Coord coord = mask.getCoord();
-                setMaskMap(coord, 0);
+                if(getMaskMap(coord) == enumMaskType(MaskType.MOVEMASK)) setMaskMap(coord, 0);
                 Game.objectManager.removeObject(mask);
                 i--;
             }
@@ -151,7 +162,7 @@ public class HighlightMask extends GameObject{
             
             if (mask.maskType == MaskType.ATTACKMASK) {
                 Coord coord = mask.getCoord();
-                setMaskMap(coord, 0);
+                if(getMaskMap(coord) == enumMaskType(MaskType.ATTACKMASK)) setMaskMap(coord, 0);
                 Game.objectManager.removeObject(mask);
                 i--;
             }
@@ -204,6 +215,7 @@ public class HighlightMask extends GameObject{
         }
         if(mask!=null){
             mask.setCoord(newCoord);
+            setMaskMap(newCoord, getMaskMap(coord));
             setMaskMap(coord, 0);
         }
     }

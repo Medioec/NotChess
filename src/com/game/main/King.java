@@ -19,7 +19,6 @@ public class King extends Units {
     public void render(Graphics2D g) {
         super.render(g);
         Font font = new Font("Calibri", Font.BOLD, 25);
-        g.setColor(Color.BLACK);
         g.setFont(font);
         g.drawString("KG", x + 6, y + 28);
 
