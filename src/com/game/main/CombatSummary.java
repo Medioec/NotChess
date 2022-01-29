@@ -119,7 +119,7 @@ public class CombatSummary extends GameObject{
                 name1 = activeUnit.getName() + " attacks " + targetUnit.getName();
                 hp1 = "HP: " + activeUnit.getHp() + "->" + final1;
                 atk1 = "ATK: " + damageDone;
-                hit1 = "HIT%: " + (activeUnit.getHit() - targetUnit.getHit());
+                hit1 = "HIT%: " + (activeUnit.getHit() - targetUnit.getAvd());
                 hp2 = "HP: " + targetUnit.getHp() + "->" + final2;
                 atk2 = "ATK: " + damageReceived;
                 hit2 = "HIT%: " + (targetUnit.getHit() - activeUnit.getAvd());

@@ -7,6 +7,8 @@ import java.awt.event.MouseEvent;
 
 import java.util.Random;
 
+import javax.swing.text.Highlighter.Highlight;
+
 public class LogicManager {
     ObjectManager objectManager;
     private static int moveCount = 0;
@@ -166,11 +168,12 @@ public class LogicManager {
                 int[] result = checkAdjacentValidMoveMask(i, coord);
                 Coord nextCoord = new Coord(result[1], result[2]);
                 if(result[0] == 1||result[0] == 0){
-                    if(HighlightMask.getMaskMap(nextCoord) == 0)
+                    if(HighlightMask.checkMaskMap(nextCoord, MaskType.NONE) )
                         new HighlightMask(nextCoord, MaskType.MOVEMASK);
                     nextMvmt = mvmt - 1;
                     showMoveRange(nextCoord, nextMvmt);
                 } else if (result[0] == 4){
+                    HighlightMask.addToMaskMap(nextCoord, MaskType.MOVEMASK);
                     nextMvmt = mvmt - 1;
                     showMoveRange(nextCoord, nextMvmt);
                 }
@@ -210,7 +213,7 @@ public class LogicManager {
             return result;
         }
         //check if incompatible mask exists
-        if(HighlightMask.getMaskMap(coord) == 1||HighlightMask.getMaskMap(coord) == 4){
+        if(HighlightMask.checkMaskMap(coord, MaskType.MOVEMASK) || HighlightMask.checkMaskMap(coord, MaskType.ACTIVEMASK) ){
             int[] result = {4, coord.x, coord.y};
             return result;
         }
@@ -355,7 +358,7 @@ public class LogicManager {
                 int tempy = j;
                 Coord targetCoord = new Coord(tempx + coord.x, tempy + coord.y);
                 if(targetCoord.x >= 0 && targetCoord.x < Game.map.getSizeX() && targetCoord.y >= 0 && targetCoord.y < Game.map.getSizeY()){
-                    if(HighlightMask.getMaskMap(targetCoord) == 0){
+                    if(!HighlightMask.checkMaskMap(targetCoord, MaskType.MOVEMASK) && !HighlightMask.checkMaskMap(targetCoord, MaskType.ACTIVEMASK)){
                     new HighlightMask(targetCoord, MaskType.ATTACKMASK);
                     }
                 }
@@ -368,7 +371,7 @@ public class LogicManager {
                 int tempx = j;
                 Coord targetCoord = new Coord(tempx + coord.x, tempy + coord.y);
                 if(targetCoord.x >= 0 && targetCoord.x < Game.map.getSizeX() && targetCoord.y >= 0 && targetCoord.y < Game.map.getSizeY()){
-                    if(HighlightMask.getMaskMap(targetCoord) == 0){
+                    if(!HighlightMask.checkMaskMap(targetCoord, MaskType.MOVEMASK) && !HighlightMask.checkMaskMap(targetCoord, MaskType.ACTIVEMASK)){
                     new HighlightMask(targetCoord, MaskType.ATTACKMASK);
                     }
                 }
@@ -380,7 +383,7 @@ public class LogicManager {
         for(int i = 0; i < Game.map.getSizeX(); i++){
             int prev = 0;
             for(int j = 0; j < Game.map.getSizeY(); j++){
-                if(HighlightMask.getMaskMap(new Coord(i, j)) == 1){
+                if(HighlightMask.checkMaskMap(new Coord(i, j), MaskType.MOVEMASK) ){
                     if(prev == 0){
                         showSpotAttackRange(new Coord(i, j), range);
                         prev = 1;
@@ -396,7 +399,7 @@ public class LogicManager {
         for(int i = 0; i < Game.map.getSizeY(); i++){
             int prev = 0;
             for(int j = 0; j < Game.map.getSizeX(); j++){
-                if(HighlightMask.getMaskMap(new Coord(j, i)) == 1){
+                if(HighlightMask.checkMaskMap(new Coord(j, i), MaskType.MOVEMASK) ){
                     if(prev == 0){
                         showSpotAttackRange(new Coord(j, i), range);
                         prev = 1;
@@ -441,7 +444,7 @@ public class LogicManager {
         }
         if(activeUnit.getUnitType() == UnitType.MEDIC && activeUnit.getPlayer() == targetUnit.getPlayer()){
             targetUnit.setHp(targetUnit.getHp() + (activeUnit.getAtk() + LogicManager.INITIATE_ATK_BONUS) * 2);
-            if(targetUnit.getHp() > targetUnit.getHp()) targetUnit.setHp(targetUnit.getMaxHp());
+            if(targetUnit.getHp() > targetUnit.getMaxHp()) targetUnit.setHp(targetUnit.getMaxHp());
         }
         else {
             // add combat code
