@@ -4,4 +4,4 @@
 
 A simple two player game made in Java with game mechanics inspired by Fire Emblem.
 
-Local two player only.
+Local multiplayer only.
